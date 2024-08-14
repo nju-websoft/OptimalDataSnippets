@@ -25,7 +25,7 @@ model = FlagICLModel('/path/to/bge-icl',
                     use_fp16=True)
 for mode in ['test', 'dev']:
     for topk in [10]:
-        for segment_method in ['ksd']:
+        for segment_method in ['ours']:
             with open(f'{output_path}/BM25_data_{segment_method}_{snippet_max_size}_top{topk}_reranking_icl_split_{mode}.tsv', 'w+') as fout:
                 print(f'ntcir data_{segment_method}')
                 with open(f'{input_path}/BM25_top{topk}_{segment_method}_{snippet_max_size}_split_{mode}.json', 'r') as fin:
