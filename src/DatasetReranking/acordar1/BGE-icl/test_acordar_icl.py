@@ -1,5 +1,4 @@
 from FlagEmbedding import FlagICLModel
-import os
 import json
 import sys
 from tqdm import tqdm

@@ -1,6 +1,5 @@
 # calculate connected component and index all text in component
 
-
 import os
 import json
 import networkx as nx

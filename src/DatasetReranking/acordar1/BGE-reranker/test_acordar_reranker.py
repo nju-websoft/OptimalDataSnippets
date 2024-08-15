@@ -1,5 +1,4 @@
 from FlagEmbedding import FlagReranker
-import os
 import json
 import sys
 from tqdm import tqdm
@@ -21,8 +20,8 @@ def cal_score(reranker, query, passages):
 for mode in ['test', 'dev']:
     for topk in [10]:
         extra = '_dev' if mode == 'dev' else ''
-        for segment_method in ['ksd']:
-            for max_size in [40]:
+        for segment_method in ['ours']:
+            for max_size in [snippet_max_size]:
                 for epoch in [10]:
                     for lr in ['1e-5', '3e-5', '5e-5']:
                         with open(f'{model_path}/BM25_data_{segment_method}_{max_size}_top{topk}_reranker_reranking{extra}_lr_{lr}_bs_2_epoch_{epoch}.tsv', 'w+') as fout:

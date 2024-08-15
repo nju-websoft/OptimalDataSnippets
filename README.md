@@ -40,8 +40,10 @@ DS1-E-1001 Q0 ef605593-f1b3-40a4-a6a1-0c1fd2a4a381 3 0.7795421099910232 mixed
 ## Requirements
 
 - pyserini==0.23.0
+- ranx==0.3.16
 - FlagEmbedding
 - tqdm
+- jsonlines
 - networkx
 - pandas
 - torch
@@ -74,7 +76,7 @@ python graph_init.py
 
 The corresponding data and indexes will be generated in `./data/test_collection_data/{test_collection}/{filename}` and `./data/index/{test_collection}/label_index`, respectively.
 
-Use the following command to extract our snippets for each query-data pair in qrels:
+Use the following command to extract our snippets for each query-data pair:
 
 
 
@@ -123,7 +125,7 @@ We then calculated the relevance score of each `<query, dataset>` pair following
 
 
 ```
-python test_acordar_{ranking_model}.py
+python test_{test_collection}_{ranking_model}.py
 ```
 
 Run the following code to obtain the evaluation results:
@@ -138,7 +140,7 @@ Following the official guidelines, we directly used [SFR](https://huggingface.co
 
 
 ```
-python test_acordar_{ranking_model}.py
+python test_{test_collection}_{ranking_model}.py
 ```
 
 

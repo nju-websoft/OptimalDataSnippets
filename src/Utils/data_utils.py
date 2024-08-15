@@ -2,7 +2,6 @@ import pandas as pd
 import csv
 import os
 from string_utils import deal_iri
-import pymysql
 
 class DataUtil:
 
