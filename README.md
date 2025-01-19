@@ -1,6 +1,6 @@
-# Extracting Optimal Data Snippets for Dataset Search and Beyond
+# μDS: Multi-Objective Data Snippet Extraction for Dataset Search
 
-This is the source code and data of the paper "Extracting Optimal Data Snippets for Dataset Search and Beyond".
+This is the source code and data of the paper "μDS: Multi-Objective Data Snippet Extraction for Dataset Search".
 
 ## Table of Contents
 
@@ -28,13 +28,13 @@ The `./src` directory contains all the source code, which is based on Python 3.1
 The `./data` directory contains test collection data and results for reranking experiments.
 
 - `./data/test_collection_data/{test_collection}` contains test collection data, including qrels, queries, and top-10 BM25 results.
-- `./data/results` contains all the results for reranking experiments. Result files are named as `{test_collection}_{reranking_model}_{snippet_extraction_method}_{topk}_{normalization_method}_{fusion_method}.txt` and are in TREC format. For example, `ntcir_bge_ours_top10_min-max_mixed.txt` represents the reranking results of BGE with our snippet extraction method, min-max normalization, and mixed fusion method.
+- `./data/results` contains all the results for reranking experiments. Result files are named as `{test_collection}_{reranking_model}_{snippet_extraction_method}_{snippet_size}_{topk}_{normalization_method}_{fusion_method}.txt` and are in TREC format. For example, `ntcir_bge_ours_20_top10_min-max_mixed.txt` represents the reranking results of bge-large-en-v1.5 with our snippet extraction method, min-max normalization, and mixed fusion method.
 
 
 ```
-DS1-E-1001 Q0 f8cfaa69-3f89-4ebe-96e2-d15a30173f43 1 1.1313708498984762 mixed
-DS1-E-1001 Q0 7629c1d5-5da8-45b5-bc8b-58483f97921a 2 0.8333792973031102 mixed
-DS1-E-1001 Q0 ef605593-f1b3-40a4-a6a1-0c1fd2a4a381 3 0.7795421099910232 mixed
+DS1-E-1001 Q0 f8cfaa69-3f89-4ebe-96e2-d15a30173f43 1 1.2606703756011592 mixed
+DS1-E-1001 Q0 7629c1d5-5da8-45b5-bc8b-58483f97921a 2 1.0600852882178813 mixed
+DS1-E-1001 Q0 adaf0ce0-1064-4f55-9397-df553bd1ef75 3 0.7461003119307256 mixed
 ```
 
 ## Requirements
@@ -53,15 +53,19 @@ DS1-E-1001 Q0 ef605593-f1b3-40a4-a6a1-0c1fd2a4a381 3 0.7795421099910232 mixed
 
 ### Getting Started
 
-We conducted experiments on the following two test collections for ad hoc dataset retrieval:
+We conducted experiments on the following three test collections for ad hoc dataset retrieval:
 
 #### NTCIR-E
 
 [NTCIR-E](https://ntcir.datasearch.jp/data_search_1/) is the English version of the test collection used in the NTCIR-15 Dataset Search task, including 46,615 datasets and 192 queries.
 
-#### ACORDAR
+#### ACORDAR 1.0
 
-[ACORDAR](https://github.com/nju-websoft/ACORDAR) is a test collection specifically for RDF datasets, including 31,589 datasets and 493 queries.
+[ACORDAR 1.0](https://github.com/nju-websoft/ACORDAR) is a test collection specifically for RDF datasets, including 31,589 datasets and 493 queries.
+
+#### ACORDAR 2.0
+
+[ACORDAR 2.0](https://github.com/nju-websoft/ACORDAR-2) is a test collection specifically for RDF datasets, including 31,589 datasets and 510 queries.
 
 We used the graph-based unification method from [CDS](https://github.com/nju-websoft/CDS) to convert the data files of these two test collections into `term.tsv` and `triple.tsv`. Place them in the `./data/test_collection_data/{test_collection}/{filename}` folder.
 
@@ -79,11 +83,9 @@ The corresponding data and indexes will be generated in `./data/test_collection_
 Use the following command to extract our snippets for each query-data pair:
 
 
-
 ```
 python extract_snippet.py
 ```
-
 
 The resulting snippets will be in JSON files located in `./data/snippets`, formatted as follows:
 
@@ -174,7 +176,6 @@ python quality_metrics.py
 ### Experiment 3: Approximation Ratio
 
 Run the following code to get the evaluation results in `./src/ApproximationRatio`:
-
 
 
 ```
