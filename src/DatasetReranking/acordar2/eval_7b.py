@@ -8,7 +8,6 @@ nick_name = 'sfr'
 # model = 'bge-icl-en'
 # nick_name = 'icl'
 base = rerank_outputs_path
-top_num = 10
 points = 4
 segment = "ours"
 
@@ -28,20 +27,20 @@ qrel_df = pd.read_csv(qrel_path,
 
 qrels = Qrels.from_df(qrel_df, q_id_col="q_id", doc_id_col='doc_id', score_col='score')
 
-metadata_df = pd.read_csv(base + f'BM25_metadata_top{top_num}_reranking_{nick_name}.tsv',
+metadata_df = pd.read_csv(base + f'pool_metadata_reranking_{nick_name}.tsv',
                           sep='\t',
                           names=['q_id', 'doc_id', 'score'],
                           dtype={'q_id': str, 'doc_id': str, 'score': float},
                           header=None)
 metadata_run = Run.from_df(df=metadata_df, q_id_col="q_id", doc_id_col='doc_id', score_col='score')
-metadata_run.save(f'{save_path}/acordar_{model}_metadata_top10.txt')
+metadata_run.save(f'{save_path}/acordar_{model}_metadata.txt')
 
 ret = transfer(evaluate(qrels, metadata_run, ['ndcg@5', 'ndcg@10', 'map@5', 'map@10']))
 print(ret)
 
 
 data_df = pd.read_csv(
-    base + f'BM25_data_{segment}_{snippet_max_size}_{alpha}_top10_reranking_{nick_name}.tsv',
+    base + f'pool_data_{segment}_{snippet_max_size}_{alpha}_reranking_{nick_name}.tsv',
     sep='\t',
     names=['q_id', 'doc_id', 'score'],
     dtype={'q_id': str, 'doc_id': str, 'score': float},
@@ -80,7 +79,7 @@ for split in range(5):
         params=best_params,
     )
     ret = transfer(evaluate(qrels_split_run, combined_run, ['ndcg@5', 'ndcg@10', 'map@5', 'map@10']))
-    combined_run.save(f'{save_path}/acordar_{model}_{segment}_top10_min-max_mixed_fold{split}.txt')
+    combined_run.save(f'{save_path}/acordar2_{model}_{segment}_min-max_mixed_fold{split}.txt')
     split_list.append((ret, metadata_split_df['q_id'].nunique()))
 
 score = {'ndcg@5': 0, 'ndcg@10': 0, 'map@5': 0, 'map@10': 0}

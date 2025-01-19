@@ -10,13 +10,14 @@ sys.path.append("..")
 from Utils.data_utils import DataUtil
 from Utils.string_utils import deal_sentence
 from Utils.data_structure import WeightedTriple, ConnectedComponent
-from .config import test_collection, snippet_base, snippet_max_size, label_index_path
+from .config import test_collection, snippet_base, snippet_max_size, label_index_path, stopword_file, alpha
 
 
 store_base = snippet_base
 max_size = snippet_max_size
 data_util = DataUtil(test_collection)
 index_path = label_index_path
+stopwords = [line.strip() for line in open(stopword_file, 'r', encoding='utf-8')]
 
 
 def get_basic_info(filename):
@@ -142,9 +143,8 @@ def generate_ours(query_id, filename):
             o_edp = entity2edp[triple.object]
             if o_edp not in covered_edp_to_entity or (triple.object == covered_edp_to_entity[o_edp]['entity'] and triple.predicate not in covered_edp_to_entity[o_edp]['covered_bp']):
                 cover += triple.oedpW
-        # cohesion
-        # give 2 times weight
-        cover += 2 * cc.cover_gain(triple) / max_size
+
+        cover = alpha * cover +  (1 - alpha) * cc.cover_gain(triple) / max_size
         return cover
 
     result_candidate_list = []
@@ -152,6 +152,7 @@ def generate_ours(query_id, filename):
     # first stage: relevance-constraint triple selection
     query_text = id2query[query_id]
     keywords = list(set(sum((keyword.split('/') for keyword in query_text.split()), [])))
+    keywords = [keyword for keyword in keywords if keyword not in stopwords]
     kws2term = dict()
     for kw in keywords:
         hits = searcher.search(kw)
@@ -250,7 +251,7 @@ def main():
     query_filename_list = []
     for query_id, dataset_id, _, _ in qrels:
         for filename in dataset2filename[dataset_id]:
-            snippet_path = os.path.join(store_base, f"{query_id}_{filename}", 'ours.json')
+            snippet_path = os.path.join(store_base, f"{query_id}_{filename}", f'ours_{max_size}_{alpha}.json')
             if os.path.exists(snippet_path):
                 continue
             if os.path.exists(f"{data_util.collection_base}/{filename}/term.tsv"):

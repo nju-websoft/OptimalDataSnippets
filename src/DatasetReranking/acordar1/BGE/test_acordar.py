@@ -4,7 +4,7 @@ import sys
 from tqdm import tqdm
 
 sys.path.append("..")
-from config import rerank_outputs_path, rerank_data_path, snippet_max_size
+from config import rerank_outputs_path, rerank_data_path, snippet_max_size, alpha
 
 model_path = rerank_outputs_path
 rerank_path = rerank_data_path
@@ -28,11 +28,11 @@ for mode in ['test', 'dev']:
                     for lr in ['1e-5', '3e-5', '5e-5']:
                         for fold in range(5):  
                             split = (fold + 3) % 5 if mode == 'dev' else (fold + 4) % 5
-                            with open(f'{model_path}/BM25_data_{segment_method}_{max_size}_top{topk}_reranking{extra}_lr_{lr}_bs_2_epoch_{epoch}_fold_{split}.tsv', 'w+') as fout:
+                            with open(f'{model_path}/BM25_data_{segment_method}_{max_size}_{alpha}_top{topk}_reranking{extra}_lr_{lr}_bs_2_epoch_{epoch}_fold_{split}.tsv', 'w+') as fout:
                                 print(f'acordar1 fold{fold}_{mode}')
-                                with open(f'{rerank_path}/BM25_top{topk}_{segment_method}_{max_size}_split_{split}.json', 'r') as fin:
+                                with open(f'{rerank_path}/BM25_top{topk}_{segment_method}_{max_size}_{alpha}_split_{split}.json', 'r') as fin:
                                     test_json = json.load(fin)
-                                model = FlagModel(f'{model_path}/{segment_method}_{max_size}/fold{fold}/lr_{lr}_bs_2_epoch_{epoch}', query_instruction_for_retrieval="Represent this sentence for searching relevant passages: ")    
+                                model = FlagModel(f'{model_path}/{segment_method}_{max_size}_{alpha}/fold{fold}/lr_{lr}_bs_2_epoch_{epoch}', query_instruction_for_retrieval="Represent this sentence for searching relevant passages: ")    
                                 for qp in tqdm(test_json):
                                     dataset_id_set = set()
                                     for res in cal_score(model, {"q_id": qp["q_id"], "question": qp["question"]}, qp["ctxs"]):

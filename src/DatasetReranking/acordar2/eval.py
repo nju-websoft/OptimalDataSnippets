@@ -4,7 +4,6 @@ from ranx import Qrels, Run, evaluate, fuse, optimize_fusion
 from .config import qrel_path, save_path, rerank_outputs_path, snippet_max_size, alpha
 
 model = 'bge' # bge or bge-reranker
-top_num = 10
 points = 4
 extra = "reranker_" if model == "bge-reranker" else ""
 base = rerank_outputs_path
@@ -20,14 +19,14 @@ qrel_df = pd.read_csv(qrel_path,
 
 qrels = Qrels.from_df(qrel_df, q_id_col="q_id", doc_id_col='doc_id', score_col='score')
 
-metadata_df = pd.read_csv(base + f'BM25_metadata_top{top_num}_{extra}reranking.tsv',
+metadata_df = pd.read_csv(base + f'pool_metadata_{extra}reranking.tsv',
                           sep='\t',
                           names=['q_id', 'doc_id', 'score'],
                           dtype={'q_id': str, 'doc_id': str, 'score': float},
                           header=None)
 metadata_run = Run.from_df(df=metadata_df, q_id_col="q_id", doc_id_col='doc_id', score_col='score')
 
-metadata_dev_df = pd.read_csv(base + f'BM25_metadata_top{top_num}_{extra}reranking_dev.tsv',
+metadata_dev_df = pd.read_csv(base + f'pool_metadata_{extra}reranking_dev.tsv',
                               sep='\t',
                               names=['q_id', 'doc_id', 'score'],
                               dtype={'q_id': str, 'doc_id': str, 'score': float},
@@ -46,7 +45,7 @@ def get_split_df(df, split):
 for epoch in [10]:
     for lr in ['1e-5', '3e-5', '5e-5']:
         data_df = pd.read_csv(
-            base + f'BM25_data_ours_{snippet_max_size}_{alpha}_top{top_num}_{extra}reranking_lr_{lr}_bs_2_epoch_{epoch}.tsv',
+            base + f'pool_data_ours_{snippet_max_size}_{alpha}_{extra}reranking_lr_{lr}_bs_2_epoch_{epoch}.tsv',
             sep='\t',
             names=['q_id', 'doc_id', 'score'],
             dtype={'q_id': str, 'doc_id': str, 'score': float},
@@ -54,7 +53,7 @@ for epoch in [10]:
         data_run = Run.from_df(df=data_df, q_id_col="q_id", doc_id_col='doc_id', score_col='score')
 
         dev_df = pd.read_csv(
-            base + f'{model}\\BM25_data_ours_{snippet_max_size}_{alpha}_top{top_num}_{extra}reranking_dev_lr_{lr}_bs_2_epoch_{epoch}.tsv',
+            base + f'{model}\\pool_data_ours_{snippet_max_size}_{alpha}_{extra}reranking_dev_lr_{lr}_bs_2_epoch_{epoch}.tsv',
             sep='\t',
             names=['q_id', 'doc_id', 'score'],
             dtype={'q_id': str, 'doc_id': str, 'score': float},
@@ -90,7 +89,7 @@ for epoch in [10]:
             )
             ret = transfer(evaluate(qrels_split_run, combined_run, ['ndcg@5', 'ndcg@10', 'map@5', 'map@10']))
             split_list.append((ret, metadata_split_df['q_id'].nunique()))
-            combined_run.save(f'{save_path}/acordar_{model}_ours_{alpha}_top{top_num}_min-max_mixed_fold{split}.txt')
+            combined_run.save(f'{save_path}/acordar2_{model}_ours_{alpha}_min-max_mixed_fold{split}.txt')
         score = {'ndcg@5': 0, 'ndcg@10': 0, 'map@5': 0, 'map@10': 0}
         total = 0
         for score_dict, num in split_list:

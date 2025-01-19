@@ -7,9 +7,8 @@ import networkx as nx
 import sys
 sys.path.append("..")
 from Utils.data_utils import DataUtil
-from .config import snippet_base, snippet_max_size, component_index_path, label_index_path, test_collection
+from .config import snippet_base, snippet_max_size, component_index_path, label_index_path, test_collection, stopword_file, alpha
 from pyserini.search.lucene import LuceneSearcher
-
 
 
 max_size = snippet_max_size
@@ -32,7 +31,7 @@ id2entity2edp = defaultdict(dict) # entity_id -> edp_id
 data_util = DataUtil(test_collection)
 
 def get_snippet_triple(query_id: str, filename: str) -> Dict[int, List[List[int]]]:
-        snippet_path = os.path.join(snippet_base, f'{query_id}_{filename}/ours.json')
+        snippet_path = os.path.join(snippet_base, f'{query_id}_{filename}/ours_{max_size}_{alpha}.json')
         if not os.path.exists(snippet_path):
             return []
         snippet_list = []
@@ -217,6 +216,7 @@ def preprocess_dataset(filename: str):
         else: # bp
             id2eid2edp[filename][edp_id].add(term_id)
     
+stopwords = [line.strip() for line in open(stopword_file, 'r', encoding='utf-8')]
 
 def get_score(query_id: int, query_text: str, filename: str) -> str:
     if filename not in id2ttlP.keys():
@@ -226,6 +226,7 @@ def get_score(query_id: int, query_text: str, filename: str) -> str:
     if len(triples) == 0:
         return -1
     keywords = sum((keyword.split('/') for keyword in query_text.split()), [])
+    keywords = [keyword for keyword in keywords if keyword not in stopwords]
     score = {
         "SkmRep": skmRep(filename, triples),
         "KwRel": kwRel(filename, keywords, triples),

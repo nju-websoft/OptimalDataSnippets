@@ -14,7 +14,7 @@ import sys
 sys.path.append("..")
 from Utils.data_utils import DataUtil
 from Utils.data_structure import WeightedTriple
-from .config import snippet_base, label_index_path, snippet_max_size, test_collection
+from .config import snippet_base, label_index_path, snippet_max_size, test_collection, stopword_file, alpha
 
 data_util = DataUtil(test_collection)
 index_path = label_index_path
@@ -30,9 +30,10 @@ id2ttlE = defaultdict(int)
 id2eid2edp = defaultdict(dict)
 id2eid2edpCount = defaultdict(dict)
 id2entity2edp = defaultdict(dict)
+stopwords = [line.strip() for line in open(stopword_file, 'r', encoding='utf-8')]
 
 def get_snippet_triple(query_id: str, filename: str) -> Dict[int, List[List[int]]]:
-    snippet_path = os.path.join(snippet_base, f'{query_id}_{filename}/ours.json')
+    snippet_path = os.path.join(snippet_base, f'{query_id}_{filename}/ours_{max_size}_{alpha}.json')
     with open(snippet_path, 'r') as f:
         snippet_list = json.load(f)
     return [[int(term) for term in triple['triples'].strip().split(' ')] for triple in snippet_list[:snippet_max_size]]
@@ -165,6 +166,7 @@ def get_keyword_information(query_id, filename):
     searcher = LuceneSearcher(os.path.join(index_path, str(filename)))
     query_text = id2query[query_id]
     keywords = list(set(sum((keyword.split('/') for keyword in query_text.split()), [])))
+    keywords = [keyword for keyword in keywords if keyword not in stopwords]
     kws2term = {}
     for kw in keywords:
         hits = searcher.search(kw)
@@ -210,13 +212,8 @@ def generate_best(args):
                 best_selection = selected_triples
                 best_selection_score = selected_score
 
-    with open('valid_query_dataset_approximation_ratio.txt', 'a') as f:
+    with open(f'{test_collection}_approximation_ratio_{alpha}.txt', 'a') as f:
         f.write(f"{query_id}\t{filename}\t{len(id2triples[filename])}\t{snippet_selection_score}\t{best_selection_score}\n")
-    
-    os.makedirs(f'{snippet_base}/{query_id}_{filename}', exist_ok=True)
-    with open(f'{snippet_base}/{query_id}_{filename}/best_triples.txt', 'w+') as f:
-        for subject, predicate, object in best_selection:
-            f.write(f"{subject}\t{predicate}\t{object}\n")
     
     if best_selection_score == 0:
         return 0, 1

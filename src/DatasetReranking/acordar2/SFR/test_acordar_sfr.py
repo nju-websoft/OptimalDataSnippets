@@ -52,18 +52,17 @@ def cal_score(model, query, passages):
     return res
 
 for mode in ['test']:
-    for topk in [10]:
-        for segment_method in ['ours']:
-            with open(f'{output_path}/BM25_data_{segment_method}_{snippet_max_size}_{alpha}_top{topk}_reranking_sfr.tsv', 'w+') as fout:
-                print(f'acordar data_{segment_method}')
-                with open(f'{input_path}/BM25_top{topk}_{segment_method}_{snippet_max_size}_{alpha}_split_{mode}.json', 'r') as fin:
-                    test_json = json.load(fin)
-                for qp in tqdm(test_json):
-                    dataset_id_set = set()
-                    torch.cuda.empty_cache()
-                    for res in cal_score(model, {"q_id": qp["q_id"], "question": qp["question"]}, qp["ctxs"]):
-                        dataset_id = int(res[1]["c_id"])
-                        if dataset_id in dataset_id_set:
-                            continue
-                        dataset_id_set.add(dataset_id)
-                        fout.write(f'{res[0]}\t{dataset_id}\t{res[2]}\n')
+    for segment_method in ['ours']:
+        with open(f'{output_path}/pool_data_{segment_method}_{snippet_max_size}_{alpha}_reranking_sfr.tsv', 'w+') as fout:
+            print(f'acordar data_{segment_method}')
+            with open(f'{input_path}/pool_{segment_method}_{snippet_max_size}_{alpha}_split_{mode}.json', 'r') as fin:
+                test_json = json.load(fin)
+            for qp in tqdm(test_json):
+                dataset_id_set = set()
+                torch.cuda.empty_cache()
+                for res in cal_score(model, {"q_id": qp["q_id"], "question": qp["question"]}, qp["ctxs"]):
+                    dataset_id = int(res[1]["c_id"])
+                    if dataset_id in dataset_id_set:
+                        continue
+                    dataset_id_set.add(dataset_id)
+                    fout.write(f'{res[0]}\t{dataset_id}\t{res[2]}\n')
