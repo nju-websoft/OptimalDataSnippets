@@ -154,7 +154,7 @@ python eval_7b.py
 ```
 
 
-### Experiment 2: Snippet Quality
+### Experiment 2: Quality Metrics
 
 Use the following commands to prepare for calculating quality metrics in `./src/SnippetQuality`:
 
